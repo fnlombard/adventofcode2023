@@ -21,20 +21,20 @@ class Cubes:
         """Returns sum of possible game IDs"""
         id_sum = 0
         for line in self.lines:
-            is_game_valid = True
-            for game_set in line.split(';'):
-                if (
-                    self._get_red(game_set) > red_cubes or
-                    self._get_green(game_set) > green_cubes or
-                    self._get_blue(game_set) > blue_cubes
-                ):
-                    is_game_valid = False
-                    break
-
-            if is_game_valid:
+            if self._is_game_valid(line, red_cubes, green_cubes, blue_cubes):
                 id_sum += self._get_game_id(line)
 
         return id_sum
+
+    def _is_game_valid(self, line: str, red: int, green: int, blue: int) -> bool:
+        for game_set in line.split(';'):
+            if (
+                self._get_red(game_set) > red or
+                self._get_green(game_set) > green or
+                self._get_blue(game_set) > blue
+            ):
+                return False
+        return True
 
     def get_power_cubes(self) -> int:
         """Returns power cubes"""
@@ -47,9 +47,7 @@ class Cubes:
                     self._get_green(game_set),
                     self._get_blue(game_set),
                 ]
-                rgb_max[0] = rgb_max[0] if rgb_set[0] < rgb_max[0] else rgb_set[0]
-                rgb_max[1] = rgb_max[1] if rgb_set[1] < rgb_max[1] else rgb_set[1]
-                rgb_max[2] = rgb_max[2] if rgb_set[2] < rgb_max[2] else rgb_set[2]
+                rgb_max = [max(rgb_max[i], rgb_set[i]) for i in range(3)]
             power_cubes += math.prod(rgb_max)
         return power_cubes
 
