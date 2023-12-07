@@ -34,14 +34,27 @@ class ScratchCard:
             solution = set(self._get_winning_numbers(line))
             hits_n = len(dealt.intersection(solution))
 
+            if hits_n > 0:
+                winnings += 2 ** (hits_n - 1)
+
+        return winnings
+
+    def count_total_cards(self) -> int:
+        """Counts the number of scratch cards"""
+        cards = [1] * len(self.lines)
+
+        for card_n, line in enumerate(self.lines):
+            dealt = set(self._get_dealt_hand(line))
+            solution = set(self._get_winning_numbers(line))
+            hits_n = len(dealt.intersection(solution))
+
             if hits_n == 0:
                 continue
 
-            winnings += math.prod([
-                2
-                for _ in range(hits_n - 1)
-            ])
-        return winnings
+            for i in range(card_n + 1, card_n + hits_n + 1):
+                cards[i] += cards[card_n]
+
+        return sum(cards)
 
     def _get_card_id(self, line: str) -> int:
         match = re.search(r'Card (\d+):', line)
@@ -66,6 +79,8 @@ class ScratchCard:
 
 if __name__ == '__main__':
     assert ScratchCard("example_01.txt").get_winning_pot() == 13
+    assert ScratchCard("example_02.txt").count_total_cards() == 30
 
     puzzle_result = ScratchCard("puzzle_input.txt")
     print(f"Total winning pot for puzzle 01: {puzzle_result.get_winning_pot()}")
+    print(f"Total winning pot for puzzle 01: {puzzle_result.count_total_cards()}")
