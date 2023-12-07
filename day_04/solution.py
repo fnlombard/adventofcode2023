@@ -7,7 +7,6 @@ Usage: solution.py
 
 
 from enum import Enum
-import math
 from pathlib import Path
 import re
 from typing import List
