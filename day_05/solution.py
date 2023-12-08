@@ -7,8 +7,7 @@ Usage: solution.py
 
 
 from pathlib import Path
-import re
-from typing import List, Literal
+from typing import List
 
 
 class Almanac:
@@ -32,11 +31,8 @@ class Almanac:
             temperature = self._map_value("light", "temperature", light)
             humidity = self._map_value("temperature", "humidity", temperature)
             location = self._map_value("humidity", "location", humidity)
-            print(seed)
-            print(f'{soil}-{fertilizer}-{water}-{light}-{temperature}-{humidity}-{location}')
             if location < lowest_value:
                 lowest_value = location
-        print(lowest_value)
         return lowest_value
 
     def _map_value(self, from_type: str, to_type: str, value: int) -> int:
@@ -46,14 +42,17 @@ class Almanac:
                 continue
             for line in lines:
                 values = line.split()
-                source_start = int(values[0])
-                destination_start = int(values[1])
+                destination_start = int(values[0])
+                source_start = int(values[1])
                 value_range = int(values[2])
 
                 if source_start <= value <= source_start + value_range:
-                    return source_start - destination_start + value
+                    return destination_start + value - source_start
         return value
 
 
 if __name__ == '__main__':
     assert Almanac("example_01.txt").lowest_location_number() == 35
+
+    puzzle_result = Almanac("puzzle_input.txt")
+    print(f"Lowest Location value for puzzle 01: {puzzle_result.lowest_location_number()}")
