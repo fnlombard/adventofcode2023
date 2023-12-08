@@ -26,6 +26,15 @@ class Almanac:
         """Returns the lowest location number"""
         return min(self._calculate_location(seed) for seed in self.seeds)
 
+    def lowest_location_number_in_range(self) -> int:
+        """Returns the lowest location number in seed range"""
+        locations = []
+        for seed_start, seed_range in zip(self.seeds[::2], self.seeds[1::2]):
+            for seed in range(seed_start, seed_start + seed_range):
+                print(f'current seed: {seed}')
+                locations.append(self._calculate_location(seed))
+        return min(locations)
+
     def _calculate_location(self, seed: int) -> int:
         stages = [
             "seed", "soil", "fertilizer", "water", "light", "temperature", "humidity", "location"
@@ -49,7 +58,9 @@ class Almanac:
 
 
 if __name__ == '__main__':
-    assert Almanac("example_01.txt").lowest_location_number() == 35
+    assert Almanac("example.txt").lowest_location_number() == 35
+    assert Almanac("example.txt").lowest_location_number_in_range() == 46
 
     puzzle_result = Almanac("puzzle_input.txt")
-    print(f"Lowest Location value for puzzle 01: {puzzle_result.lowest_location_number()}")
+    print(f"Lowest location value for puzzle 01: {puzzle_result.lowest_location_number()}")
+    print(f"Lowest location value in seed range for puzzle 01: {puzzle_result.lowest_location_number_in_range()}")
