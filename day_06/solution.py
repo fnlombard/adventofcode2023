@@ -23,12 +23,16 @@ class Speedboat:
 
     def __init__(self, filename: str) -> None:
         file_contents = Path(filename).read_text('utf-8').strip().split('\n')
-        times = [int(time_str) for time_str in file_contents[0].split()[1:]]
-        distances = [int(distance_str) for distance_str in file_contents[1].split()[1:]]
+        times = [time_str for time_str in file_contents[0].split()[1:]]
+        distances = [distance_str for distance_str in file_contents[1].split()[1:]]
         self.races = [
-            Race(time=time, distance=distance)
+            Race(time=int(time), distance=int(distance))
             for (time, distance) in zip(times, distances)
         ]
+        self.race = Race(
+            distance=int("".join(distances)),
+            time=int("".join(times))
+        )
 
     def get_winning_product(self) -> int:
         """Return product of winning possibility sum."""
@@ -38,6 +42,10 @@ class Speedboat:
         if ret_val == 1:
             ret_val = 0
         return ret_val
+
+    def get_winning_num(self) -> int:
+        """Returns the winning possibility sum for massive race."""
+        return self._get_winning_num(self.race)
 
     def _get_winning_num(self, race: Race) -> int:
         """
@@ -64,3 +72,4 @@ if __name__ == '__main__':
 
     puzzle_result = Speedboat("puzzle_input.txt")
     print(f"The product of the winning sums for puzzle 01: {puzzle_result.get_winning_product()}")
+    print(f"The winning sums for puzzle 02: {puzzle_result.get_winning_num()}")
