@@ -5,9 +5,10 @@ Solution to https://adventofcode.com/2023/day/13
 Usage: solution.py
 """
 
+from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 import numpy as np
 
@@ -17,6 +18,13 @@ class Direction(Enum):
     VERTICAL = auto()
     HORIZONTAL = auto()
     UNKNOWN = auto()
+
+
+@dataclass
+class MatrixSignature:
+    """Used to compare relfection matrices"""
+    reflection_line: int
+    reflection_size: int
 
 
 class MirrorMaze:
@@ -37,53 +45,50 @@ class MirrorMaze:
 
     def _char_to_int(self, char: str) -> int:
         if char == ".":
-            return -1
+            return 0
         elif char == "#":
             return 1
         else:
             raise RuntimeError(f"Unexpected character: {char}")
 
-    def get_reflection_checksum(self) -> int:
+    def get_reflection_checksum(self, tolerance: int) -> int:
         """Get reflection checksum for the matrix"""
 
-        # Start vertical
-        orientation = Direction.UNKNOWN
-        reflect_index = self._symmetric_submatrix_column(self.maze)
-        if reflect_index:
-            orientation = Direction.VERTICAL
-        else:
-            orientation = Direction.HORIZONTAL
-            self.maze = np.rot90(self.maze)
-            reflect_index = self._symmetric_submatrix_column(self.maze)
-            if not reflect_index:
-                raise RuntimeError(f"No reflection found for matrix:\n{self.maze}")
+        reflect_signature_vert, size_vert = self._get_submatrix_signature(self.maze, tolerance)
 
-        if orientation is Direction.VERTICAL:
-            return reflect_index
-        elif orientation is Direction.HORIZONTAL:
-            return 100 * reflect_index
-        else:
-            raise RuntimeError("Failing to detect symmetricitiyity. :()")
+        self.maze = np.rot90(self.maze)
+        reflect_signature_hor, size_hor = self._get_submatrix_signature(self.maze, tolerance)
 
-    def _symmetric_submatrix_column(self, matrix: np.ndarray) -> Optional[int]:
+        if reflect_signature_vert == reflect_signature_hor == -1:
+            raise RuntimeError(f"No reflection found for matrix:\n{self.maze}")
+
+        if size_vert > size_hor:
+            return reflect_signature_vert
+        else:
+            return 100 * reflect_signature_hor
+
+    def _get_submatrix_signature(self, matrix: np.ndarray, tolerance) -> (int, int):
         columns = matrix.shape[1]
         max_window_size = columns if columns % 2 == 0 else columns - 1
-        min_window_size = 4
+        min_window_size = 2
 
         for window_size in range(max_window_size, min_window_size - 1, -2):
-            for start_index in range(0, columns - window_size + 1):
-                submatrix = matrix[:, start_index:start_index+window_size]
-                if self._is_matrix_symmetric(submatrix):
-                    return start_index + window_size // 2
-        return None
+            # Must only test beginning and end:
+            submatrix = matrix[:, :window_size]
+            if self._is_matrix_symmetric(submatrix, tolerance):
+                return window_size // 2, window_size
+            submatrix = matrix[:, -window_size:]
+            if self._is_matrix_symmetric(submatrix, tolerance):
+                return columns - window_size // 2, window_size
+        return -1, -1
 
-    def _is_matrix_symmetric(self, matrix: np.ndarray) -> bool:
+    def _is_matrix_symmetric(self, matrix: np.ndarray, tolerance) -> bool:
         columns = matrix.shape[1]
         if columns % 2 != 0:
             raise RuntimeError("Cannot determine if matrix of uneven columns are vertically semitrical.")
         left = matrix[:, columns // 2:]
         right = np.fliplr(matrix[:, :columns // 2])
-        return np.array_equal(left, right)
+        return np.count_nonzero(np.absolute((np.subtract(left, right))) == 1) == tolerance
 
 
 class Solution:
@@ -95,13 +100,18 @@ class Solution:
         for content in file_contents:
             self.mazes.append(MirrorMaze(content.split()))
 
-    def get_maze_checksum(self) -> int:
+    def get_maze_checksum(self, tolerance: int = 0) -> int:
         """Solution for puzzle 01"""
         checksum = 0
         for maze in self.mazes:
-            checksum += maze.get_reflection_checksum()
+            checksum += maze.get_reflection_checksum(tolerance)
         return checksum
 
 
 if __name__ == '__main__':
     assert Solution("example.txt").get_maze_checksum() == 405
+    assert Solution("example.txt").get_maze_checksum(tolerance=1) == 400
+
+    puzzle_result = Solution("puzzle_input.txt")
+    print(f"Solution 01: {puzzle_result.get_maze_checksum()}")
+    print(f"Solution 02: {puzzle_result.get_maze_checksum(tolerance=1)}")
