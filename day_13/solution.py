@@ -65,7 +65,7 @@ class MirrorMaze:
         if size_vert > size_hor:
             return reflect_signature_vert
         else:
-            return 100 * reflect_signature_hor
+            return reflect_signature_hor * 100
 
     def _get_submatrix_signature(self, matrix: np.ndarray, tolerance) -> (int, int):
         columns = matrix.shape[1]
@@ -103,8 +103,9 @@ class Solution:
     def get_maze_checksum(self, tolerance: int = 0) -> int:
         """Solution for puzzle 01"""
         checksum = 0
-        for maze in self.mazes:
-            checksum += maze.get_reflection_checksum(tolerance)
+        for index, maze in enumerate(self.mazes):
+            test = maze.get_reflection_checksum(tolerance)
+            checksum += test
         return checksum
 
 
@@ -114,4 +115,5 @@ if __name__ == '__main__':
 
     puzzle_result = Solution("puzzle_input.txt")
     print(f"Solution 01: {puzzle_result.get_maze_checksum()}")
+    puzzle_result = Solution("puzzle_input.txt")
     print(f"Solution 02: {puzzle_result.get_maze_checksum(tolerance=1)}")
