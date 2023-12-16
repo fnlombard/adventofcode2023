@@ -5,9 +5,10 @@ Solution to https://adventofcode.com/2023/day/14
 Usage: solution.py
 """
 
+from contextlib import contextmanager
 from enum import Enum, auto
 from pathlib import Path
-from typing import List
+from typing import Iterator, List, Tuple
 
 import numpy as np
 
@@ -52,6 +53,27 @@ class Board:
         else:
             raise RuntimeError(f"Unkown element: {element}")
 
+    @contextmanager
+    def boulder_positions(self, direction: Direction) -> Iterator[List[Tuple[int, int]]]:
+        try:
+            positions = []
+            row_n, col_n = self.content.shape
+            if direction == Direction.NORTH or direction == Direction.SOUTH:
+                rows = range(1, row_n) if direction == Direction.NORTH else range(row_n - 2, -1, -1)
+                for c_i in range(col_n):
+                    for r_i in rows:
+                        if self.content[r_i][c_i] == Element.BOULDER:
+                            positions.append((r_i, c_i))
+            elif direction == Direction.WEST or direction == Direction.EAST:
+                cols = range(1, col_n) if direction == Direction.WEST else range(col_n - 2, -1, -1)
+                for r_i in range(self.content.shape[0]):
+                    for c_i in cols:
+                        if self.content[r_i][c_i] == Element.BOULDER:
+                            positions.append((r_i, c_i))
+            yield positions
+        finally:
+            pass
+
     def __str__(self) -> str:
         return '\n'.join(
             ''.join(
@@ -59,27 +81,26 @@ class Board:
             for line in self.content
         )
 
-    def get_load(self) -> int: ...
+    def get_load(self) -> int:
+        load = 0
+        rows, cols = self.content.shape
+        for r_i in range(rows):
+            for c_i in range(cols):
+                if self.content[r_i][c_i] == Element.BOULDER:
+                    load += rows - r_i
+        return load
 
     def tilt(self, direction: Direction = Direction.NORTH) -> None:
-        if direction == Direction.NORTH:
-            for r_i, row in enumerate(self.content):
-                for c_i, element in enumerate(row):
-                    if element == Element.BOULDER:
-                        self._shift(row=r_i + 1, column=c_i, direction=direction)
+        with self.boulder_positions(direction) as positions:
+            for r_i, c_i in positions:
+                self._move_boulder_up(r_i, c_i)
 
-    def _shift(self, row: int, column: int, direction: Direction = Direction.NORTH) -> None:
-        if row < 0 or row >= self.content.shape[0]:
+    def _move_boulder_up(self, row: int, column: int) -> None:
+        if row == 0 or self.content[row - 1][column] != Element.SPACE:
             return
-        if column < 0 or column >= self.content.shape[0]:
-            return
-        if self.content[row][column] == Element.SPACE:
-            if direction == Direction.NORTH:
-                return self._shift(row=row+1, column=column, direction=direction)
-        elif self.content[row][column] in [Element.BOULDER, Element.CUBE]:
-            return
-        else:
-            raise RuntimeError(f"Unknown element: {self.content[row][column]}")
+        self.content[row][column] = Element.SPACE
+        self.content[row - 1][column] = Element.BOULDER
+        self._move_boulder_up(row - 1, column)
 
 
 class Solution:
