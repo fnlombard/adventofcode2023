@@ -8,16 +8,9 @@ Usage: solution.py
 from contextlib import contextmanager
 from enum import Enum, auto
 from pathlib import Path
-from typing import Iterator, List, Tuple
+from typing import Iterator, List, Optional, Tuple
 
 import numpy as np
-
-
-class Direction(Enum):
-    NORTH = auto()
-    EAST = auto()
-    SOUTH = auto()
-    WEST = auto()
 
 
 class Element(Enum):
@@ -54,22 +47,14 @@ class Board:
             raise RuntimeError(f"Unkown element: {element}")
 
     @contextmanager
-    def boulder_positions(self, direction: Direction) -> Iterator[List[Tuple[int, int]]]:
+    def boulder_positions(self) -> Iterator[List[Tuple[int, int]]]:
         try:
             positions = []
             row_n, col_n = self.content.shape
-            if direction == Direction.NORTH or direction == Direction.SOUTH:
-                rows = range(1, row_n) if direction == Direction.NORTH else range(row_n - 2, -1, -1)
-                for c_i in range(col_n):
-                    for r_i in rows:
-                        if self.content[r_i][c_i] == Element.BOULDER:
-                            positions.append((r_i, c_i))
-            elif direction == Direction.WEST or direction == Direction.EAST:
-                cols = range(1, col_n) if direction == Direction.WEST else range(col_n - 2, -1, -1)
-                for r_i in range(self.content.shape[0]):
-                    for c_i in cols:
-                        if self.content[r_i][c_i] == Element.BOULDER:
-                            positions.append((r_i, c_i))
+            for c_i in range(col_n):
+                for r_i in range(1, row_n):
+                    if self.content[r_i][c_i] == Element.BOULDER:
+                        positions.append((r_i, c_i))
             yield positions
         finally:
             pass
@@ -90,17 +75,56 @@ class Board:
                     load += rows - r_i
         return load
 
-    def tilt(self, direction: Direction = Direction.NORTH) -> None:
-        with self.boulder_positions(direction) as positions:
-            for r_i, c_i in positions:
-                self._move_boulder_up(r_i, c_i)
+    def spin_cycle(self) -> None:
+        for _ in range(4):
+            self.tilt_north()
+            self.content = np.rot90(self.content, 3)  # 3 for counter-clockwise
 
-    def _move_boulder_up(self, row: int, column: int) -> None:
-        if row == 0 or self.content[row - 1][column] != Element.SPACE:
-            return
-        self.content[row][column] = Element.SPACE
-        self.content[row - 1][column] = Element.BOULDER
-        self._move_boulder_up(row - 1, column)
+    def load_after_n_cycles(self, n_cycles: int) -> int:
+        if not isinstance(n_cycles, int):
+            n_cycles = int(n_cycles)
+
+        load_values = np.array([self.get_load()])
+        for _ in range(n_cycles):
+            self.spin_cycle()
+            load_values = np.append(load_values, self.get_load())
+            if len(load_values) > 1e3:
+                oscillation_period = self._oscillation_period(load_values)
+                if oscillation_period is not None:
+                    pattern = load_values[-oscillation_period:]
+                    pattern_idx = (n_cycles - len(load_values)) % len(pattern)
+                    return pattern[pattern_idx]
+        return self.get_load()
+
+    def _oscillation_period(self, data: np.ndarray, threshold: int = 0.01) -> Optional[int]:
+        data_without_dc = data - np.mean(data)
+        windowed_data = data_without_dc * np.hanning(len(data_without_dc))
+        fft_result = np.fft.fft(windowed_data)
+        frequencies = np.fft.fftfreq(len(data), d=1.0)  # Unit time interval
+        magnitude = np.abs(fft_result)
+
+        ignore_freq_below = threshold
+        magnitude[frequencies < ignore_freq_below] = 0
+        dominant_freq_idx = np.argmax(magnitude)
+        dominant_frequency = frequencies[dominant_freq_idx]
+        if dominant_frequency == 0:
+            return None
+        period = round(1 / dominant_frequency)
+
+        if period < len(data) // 10:  # Ensure you get all frequencies
+            return period
+        return None
+
+    def tilt_north(self) -> None:
+        with self.boulder_positions() as positions:
+            for r_i, c_i in positions:
+                self._move_boulder_north(r_i, c_i)
+
+    def _move_boulder_north(self, row: int, column: int) -> None:
+        while row > 0 and self.content[row - 1][column] == Element.SPACE:
+            self.content[row][column] = Element.SPACE
+            row -= 1
+            self.content[row][column] = Element.BOULDER
 
 
 class Solution:
@@ -109,12 +133,17 @@ class Solution:
         self.board = Board(board_data=file_contents)
 
     def puzzle_01(self) -> int:
-        self.board.tilt()
+        self.board.tilt_north()
         return self.board.get_load()
+
+    def puzzle_02(self) -> int:
+        return self.board.load_after_n_cycles(1e9)
 
 
 if __name__ == '__main__':
     assert Solution("example.txt").puzzle_01() == 136
+    assert Solution("example.txt").puzzle_02() == 64
 
     puzzle_result = Solution("puzzle_input.txt")
     print(f"Solution 01: {puzzle_result.puzzle_01()}")
+    print(f"Solution 01: {puzzle_result.puzzle_02()}")
