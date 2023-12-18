@@ -88,15 +88,29 @@ class Board:
         for _ in range(n_cycles):
             self.spin_cycle()
             load_values = np.append(load_values, self.get_load())
-            if len(load_values) > 1e3:
-                oscillation_period = self._oscillation_period(load_values)
-                if oscillation_period is not None:
-                    pattern = load_values[-oscillation_period:]
-                    pattern_idx = (n_cycles - len(load_values)) % len(pattern)
-                    return pattern[pattern_idx]
+            pattern_length = self._get_pattern_length(load_values)
+            oscillation_period = self._oscillation_period(load_values)
+            match_length = pattern_length if pattern_length is not None else oscillation_period
+            if match_length is not None:
+                pattern = load_values[-match_length:]
+                pattern_idx = (n_cycles - len(load_values)) % len(pattern)
+                return pattern[pattern_idx]
         return self.get_load()
 
+    def _get_pattern_length(self, data: np.ndarray) -> Optional[int]:
+        data_length = len(data)
+        if data_length < 6:
+            return None
+        for pattern_length in range(3, data_length // 2):
+            test_pattern = data[-pattern_length:]
+            search_pattern = data[-2 * pattern_length:-pattern_length]
+            if np.array_equal(test_pattern, search_pattern):
+                return pattern_length
+        return None
+
     def _oscillation_period(self, data: np.ndarray, threshold: int = 0.01) -> Optional[int]:
+        if len(data) < 500:
+            return None
         data_without_dc = data - np.mean(data)
         windowed_data = data_without_dc * np.hanning(len(data_without_dc))
         fft_result = np.fft.fft(windowed_data)
@@ -146,4 +160,4 @@ if __name__ == '__main__':
 
     puzzle_result = Solution("puzzle_input.txt")
     print(f"Solution 01: {puzzle_result.puzzle_01()}")
-    print(f"Solution 01: {puzzle_result.puzzle_02()}")
+    print(f"Solution 02: {puzzle_result.puzzle_02()}")
