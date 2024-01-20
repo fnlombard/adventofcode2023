@@ -28,10 +28,7 @@ class Box:
             self.lenses.append(lens)
 
     def remove_lens(self, label: str) -> None:
-        for lens in self.lenses:
-            if lens.label == label:
-                self.lenses.remove(lens)
-                return
+        self.lenses = [lens for lens in self.lenses if lens.label != label]
 
     def contains_lens_(self, label: int) -> Optional[int]:
         for index, lens in enumerate(self.lenses):
@@ -49,6 +46,7 @@ class AsciiParser:
         calculate_ascii_value = (
             lambda first_char, second_char: (first_char + second_char) * 17 % 256
         )
+
         return reduce(calculate_ascii_value, [ord(char) for char in ascii], 0)
 
     def get_total_value(self) -> int:
@@ -58,13 +56,12 @@ class AsciiParser:
         for ascii_string in self.ascii_string_.split(","):
             if "=" in ascii_string:
                 label, focal_length = ascii_string.split("=")
-                box_num = self._get_value(label)
-                lens = Lens(label=label, focal_length=int(focal_length))
-                self.boxes_[box_num].add_lens(lens)
+                self.boxes_[self._get_value(label)].add_lens(
+                    Lens(label, int(focal_length))
+                )
             elif "-" in ascii_string:
                 label, _ = ascii_string.split("-")
-                box_num = self._get_value(label)
-                self.boxes_[box_num].remove_lens(label)
+                self.boxes_[self._get_value(label)].remove_lens(label)
             else:
                 raise Exception(f"Unexpected value: {ascii_string}")
 
