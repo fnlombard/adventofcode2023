@@ -20,7 +20,7 @@ class AsciiParser:
         calculate_ascii_value = (
             lambda first_char, second_char: (first_char + second_char) * 17 % 256
         )
-        return reduce(calculate_ascii_value, [0] + [ord(char) for char in ascii])
+        return reduce(calculate_ascii_value, [ord(char) for char in ascii], 0)
 
     def get_total_value(self) -> int:
         return sum([self._get_value(ascii) for ascii in self.ascii_string_.split(",")])
