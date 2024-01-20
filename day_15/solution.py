@@ -5,16 +5,45 @@ Solution to https://adventofcode.com/2023/day/15
 Usage: solution.py
 """
 
-from contextlib import contextmanager
-from enum import Enum, auto
 from pathlib import Path
-from typing import Iterator, List, Optional, Tuple
+from typing import List, Optional
 from functools import reduce
+from dataclasses import dataclass
+
+
+@dataclass
+class Lens:
+    label: str
+    focal_length: int
+
+
+class Box:
+    def __init__(self) -> None:
+        self.lenses: List[Lens] = []
+
+    def add_lens(self, lens: Lens) -> None:
+        if (lens_index := self.contains_lens_(lens.label)) is not None:
+            self.lenses[lens_index].focal_length = lens.focal_length
+        else:
+            self.lenses.append(lens)
+
+    def remove_lens(self, label: str) -> None:
+        for lens in self.lenses:
+            if lens.label == label:
+                self.lenses.remove(lens)
+                return
+
+    def contains_lens_(self, label: int) -> Optional[int]:
+        for index, lens in enumerate(self.lenses):
+            if lens.label == label:
+                return index
+        return None
 
 
 class AsciiParser:
     def __init__(self, ascii_string: str) -> None:
         self.ascii_string_ = ascii_string
+        self.boxes_: List[Box] = [Box() for _ in range(256)]
 
     def _get_value(self, ascii: str) -> int:
         calculate_ascii_value = (
@@ -24,6 +53,28 @@ class AsciiParser:
 
     def get_total_value(self) -> int:
         return sum([self._get_value(ascii) for ascii in self.ascii_string_.split(",")])
+
+    def get_focussing_power(self) -> int:
+        for ascii_string in self.ascii_string_.split(","):
+            if "=" in ascii_string:
+                label, focal_length = ascii_string.split("=")
+                box_num = self._get_value(label)
+                lens = Lens(label=label, focal_length=int(focal_length))
+                self.boxes_[box_num].add_lens(lens)
+            elif "-" in ascii_string:
+                label, _ = ascii_string.split("-")
+                box_num = self._get_value(label)
+                self.boxes_[box_num].remove_lens(label)
+            else:
+                raise Exception(f"Unexpected value: {ascii_string}")
+
+        return sum(
+            [
+                (box_num + 1) * (lens_num + 1) * lens.focal_length
+                for box_num, box in enumerate(self.boxes_)
+                for lens_num, lens in enumerate(box.lenses)
+            ]
+        )
 
 
 class Solution:
@@ -35,12 +86,12 @@ class Solution:
         return self.ascii_parser_.get_total_value()
 
     def puzzle_02(self) -> int:
-        return 0
+        return self.ascii_parser_.get_focussing_power()
 
 
 if __name__ == "__main__":
     assert Solution("example.txt").puzzle_01() == 1320
-    # assert Solution("example.txt").puzzle_02() == 64
+    assert Solution("example.txt").puzzle_02() == 145
 
     puzzle_result = Solution("puzzle_input.txt")
     print(f"Solution 01: {puzzle_result.puzzle_01()}")
