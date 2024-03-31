@@ -9,11 +9,9 @@ from pathlib import Path
 
 
 class EnergiseGrid:
-    def __init__(self, definition: str) -> None:
-        ...
+    def __init__(self, definition: str) -> None: ...
 
-    def get_energised_tiles() -> int:
-        ...
+    def get_energised_tiles() -> int: ...
 
 
 class Solution:
@@ -29,7 +27,7 @@ class Solution:
 
 
 if __name__ == "__main__":
-    assert Solution("example.txt").puzzle_01() == 1320
+    assert Solution("example.txt").puzzle_01() == 46
     # assert Solution("example.txt").puzzle_02() == 145
 
     puzzle_result = Solution("puzzle_input.txt")
