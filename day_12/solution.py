@@ -14,7 +14,7 @@ class SpringMap:
     """Loads in broken spring map and processes it."""
 
     def __init__(self, filename: str) -> None:
-        self.lines: List[str] = Path(filename).read_text('utf-8').strip().split('\n')
+        self.lines: List[str] = Path(filename).read_text("utf-8").strip().split("\n")
 
     def get_sum_of_broken_spring_variance(self) -> int:
         for line in self.lines:
@@ -23,5 +23,6 @@ class SpringMap:
         return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # assert SpringMap("example.txt").get_winning_pot() == 21
+    pass
