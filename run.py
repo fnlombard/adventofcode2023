@@ -33,13 +33,11 @@ def setup_venv(config: Config) -> None:
         subprocess.run(["python", "-m", "venv", config.venv])
 
     print("Installing required packages...")
-    print([str(config.pip), "install", "mypy", "pylint", "black"])
     subprocess.run([str(config.pip), "install", "mypy", "pylint", "black"])
 
 
 def run_checks(config: Config) -> None:
     def run_check(library: str) -> subprocess.CompletedProcess:
-        print(f"testing: {[config.python, library, "."]}")
         subprocess.run([config.venv / "Scripts" / library, "."])
 
     _mypy_result = run_check("mypy")
