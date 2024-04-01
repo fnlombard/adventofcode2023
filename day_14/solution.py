@@ -21,17 +21,19 @@ class Element(Enum):
 
 class Board:
     def __init__(self, board_data: List[str]) -> None:
-        self.content = np.array([
-            [self._map_to_element(character) for character in line]
-            for line in board_data
-        ])
+        self.content = np.array(
+            [
+                [self._map_to_element(character) for character in line]
+                for line in board_data
+            ]
+        )
 
     def _map_to_element(self, character: str) -> Element:
-        if character == '.':
+        if character == ".":
             return Element.SPACE
-        elif character == 'O':
+        elif character == "O":
             return Element.BOULDER
-        elif character == '#':
+        elif character == "#":
             return Element.CUBE
         else:
             raise RuntimeError(f"Unkown character: {character}")
@@ -60,9 +62,8 @@ class Board:
             pass
 
     def __str__(self) -> str:
-        return '\n'.join(
-            ''.join(
-                self._map_from_element(element) for element in line)
+        return "\n".join(
+            "".join(self._map_from_element(element) for element in line)
             for line in self.content
         )
 
@@ -90,7 +91,9 @@ class Board:
             load_values = np.append(load_values, self.get_load())
             pattern_length = self._get_pattern_length(load_values)
             oscillation_period = self._oscillation_period(load_values)
-            match_length = pattern_length if pattern_length is not None else oscillation_period
+            match_length = (
+                pattern_length if pattern_length is not None else oscillation_period
+            )
             if match_length is not None:
                 pattern = load_values[-match_length:]
                 pattern_idx = (n_cycles - len(load_values)) % len(pattern)
@@ -103,12 +106,14 @@ class Board:
             return None
         for pattern_length in range(3, data_length // 2):
             test_pattern = data[-pattern_length:]
-            search_pattern = data[-2 * pattern_length:-pattern_length]
+            search_pattern = data[-2 * pattern_length : -pattern_length]
             if np.array_equal(test_pattern, search_pattern):
                 return pattern_length
         return None
 
-    def _oscillation_period(self, data: np.ndarray, threshold: int = 0.01) -> Optional[int]:
+    def _oscillation_period(
+        self, data: np.ndarray, threshold: int = 0.01
+    ) -> Optional[int]:
         if len(data) < 500:
             return None
         data_without_dc = data - np.mean(data)
@@ -143,7 +148,7 @@ class Board:
 
 class Solution:
     def __init__(self, filename: str) -> None:
-        file_contents = Path(filename).read_text('utf-8').strip().split('\n')
+        file_contents = Path(filename).read_text("utf-8").strip().split("\n")
         self.board = Board(board_data=file_contents)
 
     def puzzle_01(self) -> int:
@@ -154,7 +159,7 @@ class Solution:
         return self.board.load_after_n_cycles(1e9)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     assert Solution("example.txt").puzzle_01() == 136
     assert Solution("example.txt").puzzle_02() == 64
 

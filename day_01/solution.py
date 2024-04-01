@@ -13,11 +13,7 @@ import re
 
 def _parse_args() -> Optional[Path]:
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--file",
-        "-f",
-        type=str,
-        required=True)
+    parser.add_argument("--file", "-f", type=str, required=True)
     (args, _) = parser.parse_known_args()
 
     file_path = Path(args.file)
@@ -31,6 +27,7 @@ def _parse_args() -> Optional[Path]:
         return None
 
     return file_path
+
 
 value_map = {
     "1": "1",
@@ -75,8 +72,8 @@ valid_keys = [
 ]
 
 REGEX_GROUP = f'{"|".join(valid_keys)}'
-REGEX_FIRST = f'({REGEX_GROUP}).*'
-REGEX_LAST = f'({REGEX_GROUP[::-1]}).*'
+REGEX_FIRST = f"({REGEX_GROUP}).*"
+REGEX_LAST = f"({REGEX_GROUP[::-1]}).*"
 
 
 def _get_elf_number(line: str) -> int:
@@ -106,5 +103,5 @@ def main():
     print(elf_sum)
 
 
-if __name__ == '__main__':
-    cProfile.run('main()')
+if __name__ == "__main__":
+    cProfile.run("main()")

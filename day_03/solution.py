@@ -26,7 +26,7 @@ class Engine:
     """Reads file engine schematic and processes it."""
 
     def __init__(self, filename) -> None:
-        self.lines: List[str] = Path(filename).read_text('utf-8').strip().split('\n')
+        self.lines: List[str] = Path(filename).read_text("utf-8").strip().split("\n")
 
     def get_part_number_sum(self) -> int:
         """Returns part number sum"""
@@ -34,7 +34,7 @@ class Engine:
         ret_val = 0
         for y, line in enumerate(self.lines):
             for x, char in enumerate(line):
-                if not char.isalnum() and char != '.':
+                if not char.isalnum() and char != ".":
                     ret_val += self._get_surrounding_sum(x, y)
         return ret_val
 
@@ -43,24 +43,26 @@ class Engine:
         ret_val = 0
         for y, line in enumerate(self.lines):
             for x, char in enumerate(line):
-                if not char.isalnum() and char != '.':
+                if not char.isalnum() and char != ".":
                     ret_val += self._get_surrounding_product(x, y)
         return ret_val
 
     def _get_and_replace_number(self, x: int, y: int) -> int:
         """Search East and grab from West."""
         extend_search = 0
-        for character in self.lines[y][x + 1:]:
+        for character in self.lines[y][x + 1 :]:
             if character.isdigit():
                 extend_search += 1
             else:
                 break
 
-        match = re.search(r'(\d+)$', self.lines[y][:x + extend_search + 1])
+        match = re.search(r"(\d+)$", self.lines[y][: x + extend_search + 1])
         assert match
 
         (start, end) = match.span()
-        self.lines[y] = self.lines[y][:start] + '.' * (end - start) + self.lines[y][end:]
+        self.lines[y] = (
+            self.lines[y][:start] + "." * (end - start) + self.lines[y][end:]
+        )
         return int(match.group(1))
 
     def _get_surrounding_sum(self, x: int, y: int) -> int:
@@ -91,7 +93,7 @@ class Engine:
         return min(max(value, lower_bound), upper_bound)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     assert Engine("example_01.txt").get_part_number_sum() == 4361
     assert Engine("example_02.txt").get_gear_ratio() == 467835
 

@@ -27,10 +27,9 @@ class MirrorMaze:
         if not raw_maze:
             raise ValueError("raw_maze cannot be empty")
 
-        self.maze = np.array([
-            [1 if char == '#' else 0 for char in line]
-            for line in raw_maze
-        ])
+        self.maze = np.array(
+            [[1 if char == "#" else 0 for char in line] for line in raw_maze]
+        )
 
     def get_reflection_checksum(self, tolerance: int) -> int:
         vert_sig = self._get_submatrix_signature(self.maze, tolerance)
@@ -41,7 +40,9 @@ class MirrorMaze:
 
         return max(vert_sig.reflection_line, hor_sig.reflection_line * 100)
 
-    def _get_submatrix_signature(self, matrix: np.ndarray, tolerance) -> MatrixSignature:
+    def _get_submatrix_signature(
+        self, matrix: np.ndarray, tolerance
+    ) -> MatrixSignature:
         columns = matrix.shape[1]
         max_window_size = columns - (columns % 2)
 
@@ -61,14 +62,14 @@ class MirrorMaze:
 
 class Solution:
     def __init__(self, filename: str) -> None:
-        file_contents = Path(filename).read_text('utf-8').strip().split('\n\n')
-        self.mazes = [MirrorMaze(content.split('\n')) for content in file_contents]
+        file_contents = Path(filename).read_text("utf-8").strip().split("\n\n")
+        self.mazes = [MirrorMaze(content.split("\n")) for content in file_contents]
 
     def get_maze_checksum(self, tolerance: int = 0) -> int:
         return sum(maze.get_reflection_checksum(tolerance) for maze in self.mazes)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     assert Solution("example.txt").get_maze_checksum() == 405
     assert Solution("example.txt").get_maze_checksum(tolerance=1) == 400
 
