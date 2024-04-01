@@ -1,41 +1,56 @@
 #!/usr/bin/env python
 
 from contextlib import contextmanager
+from dataclasses import dataclass
 import os
+from pathlib import Path
 import sys
 import subprocess
 
 
-@contextmanager
-def setup_venv(day_path):
-    venv_path = os.path.join(day_path, "venv")
-    if not os.path.exists(venv_path):
-        print("Creating virtual environment...")
-        subprocess.run(["python", "-m", "venv", "venv"], cwd=day_path)
+@dataclass
+class Config:
+    day: Path
+    venv: Path
 
-    scripts_path = os.path.join(venv_path, "Scripts")
-    os.environ["PATH"] = f"{scripts_path}:{os.environ['PATH']}"
+    @property
+    def python(self) -> Path:
+        return self.venv / "Scripts" / "python.exe"
+
+    @property
+    def pip(self) -> Path:
+        return self.venv / "Scripts" / "pip.exe"
+
+    @property
+    def solution(self) -> Path:
+        return self.day / "solution.py"
+
+
+def setup_venv(config: Config) -> None:
+
+    if not config.venv.exists():
+        print("Creating virtual environment...")
+        subprocess.run(["python", "-m", "venv", config.venv])
 
     print("Installing required packages...")
-    subprocess.run(
-        [os.path.join(scripts_path, "pip"), "install", "mypy", "pylint", "black"],
-        cwd=day_path,
+    print([str(config.pip), "install", "mypy", "pylint", "black"])
+    subprocess.run([str(config.pip), "install", "mypy", "pylint", "black"])
+
+
+def run_checks(config: Config) -> None:
+    def run_check(library: str) -> subprocess.CompletedProcess:
+        print(f"testing: {[config.python, library, "."]}")
+        subprocess.run([config.venv / "Scripts" / library, "."])
+
+    _mypy_result = run_check("mypy")
+    _pylint_result = run_check("pylint")
+    _black_result = run_check("black")
+
+
+def run_solution(config: Config) -> None:
+    _solution_result = subprocess.run(
+        [config.python, config.solution], cwd=config.solution.parent
     )
-
-    # Returns context manager for local environment
-    activate_script = os.path.join(scripts_path, "activate.bat")
-    subprocess.run(activate_script)
-
-
-def run_checks(day_path):
-    subprocess.run(["mypy", "."], cwd=day_path)
-    subprocess.run(["pylint", "."], cwd=day_path)
-    subprocess.run(["black", "."], cwd=day_path)
-
-
-def run_solution(day_path):
-    solution_file = os.path.join(day_path, "solution.py")
-    subprocess.run(["python", solution_file], cwd=day_path)
 
 
 if __name__ == "__main__":
@@ -43,15 +58,18 @@ if __name__ == "__main__":
         print("Usage: ./run.py DayXX")
         sys.exit(1)
 
-    project_dir = os.path.dirname(os.path.abspath(__file__))
+    day_arg = Path(sys.argv[1])
+    current_dir = Path(os.getcwd())
 
-    day_dir = sys.argv[1]
-    day_path = os.path.join(project_dir, day_dir)
+    config = Config(
+        day=current_dir / day_arg,
+        venv=current_dir / ".venv",
+    )
 
-    if not os.path.exists(day_path):
-        print(f"Directory {day_path} does not exist.")
+    if not (solution_path := config.day).exists():
+        print(f"Directory {solution_path} does not exist.")
         sys.exit(1)
 
-    setup_venv(day_path)
-    run_checks(day_path)
-    run_solution(day_path)
+    setup_venv(config=config)
+    run_checks(config)
+    run_solution(config)
