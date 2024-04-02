@@ -81,7 +81,7 @@ class Board:
             self.tilt_north()
             self.content = np.rot90(self.content, 3)  # 3 for counter-clockwise
 
-    def load_after_n_cycles(self, n_cycles: int) -> int:
+    def load_after_n_cycles(self, n_cycles: float) -> int:
         if not isinstance(n_cycles, int):
             n_cycles = int(n_cycles)
 
@@ -112,7 +112,7 @@ class Board:
         return None
 
     def _oscillation_period(
-        self, data: np.ndarray, threshold: int = 0.01
+        self, data: np.ndarray, threshold: float = 0.01
     ) -> Optional[int]:
         if len(data) < 500:
             return None

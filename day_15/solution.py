@@ -30,7 +30,7 @@ class Box:
     def remove_lens(self, label: str) -> None:
         self.lenses = [lens for lens in self.lenses if lens.label != label]
 
-    def contains_lens_(self, label: int) -> Optional[int]:
+    def contains_lens_(self, label: str) -> Optional[int]:
         for index, lens in enumerate(self.lenses):
             if lens.label == label:
                 return index
