@@ -11,7 +11,8 @@ from pathlib import Path
 class EnergiseGrid:
     def __init__(self, definition: str) -> None: ...
 
-    def get_energised_tiles() -> int: ...
+    def get_energised_tiles(self) -> int:
+        return 1
 
 
 class Solution:

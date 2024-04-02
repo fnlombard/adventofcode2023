@@ -29,16 +29,26 @@ class Config:
 def setup_venv(config: Config) -> None:
 
     if not config.venv.exists():
-        print("Creating virtual environment...")
+        print("Creating virtual environment.")
         subprocess.run(["python", "-m", "venv", config.venv])
+    else:
+        print("Reusing virtual environment.")
 
-    print("Installing required packages...")
-    subprocess.run([str(config.pip), "install", "mypy", "pylint", "black"])
+    print("Installing required packages.")
+    install_output = subprocess.run(
+        args=[str(config.pip), "install", "mypy", "pylint", "black", "numpy"],
+        capture_output=True,
+    )
+
+    if install_output.stderr:
+        print(f"    Error installing requirements:\n{install_output.stderr!r}\n")
+    else:
+        print("    Successfully installed packages.\n")
 
 
 def run_checks(config: Config) -> None:
     def run_check(library: str) -> subprocess.CompletedProcess:
-        subprocess.run([config.venv / "Scripts" / library, "."])
+        return subprocess.run([config.venv / "Scripts" / library, "."])
 
     _mypy_result = run_check("mypy")
     _pylint_result = run_check("pylint")

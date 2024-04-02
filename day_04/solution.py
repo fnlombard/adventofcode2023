@@ -56,12 +56,6 @@ class ScratchCard:
 
         return sum(cards)
 
-    def _get_card_id(self, line: str) -> int:
-        match = re.search(r"Card (\d+):", line)
-
-        if not match:
-            raise RuntimeError(f"Cannot parse Card ID from {line}")
-
     def _get_dealt_hand(self, line: str) -> List[int]:
         return self._get_numbers(CardPart.DEALT, line)
 

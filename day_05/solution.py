@@ -53,10 +53,10 @@ class RangeMap:
             )
         self._maps.sort(key=lambda item: item.source_range_start)
 
-    def map_value(self, source_value: int) -> int:
+    def map_value(self, source_value: float) -> Tuple[float, float]:
         """Returns mapped value"""
         destination_value = source_value
-        range_to_end = 1
+        range_to_end = float(1)
 
         for index, map_info in enumerate(self._maps):
             if source_value < map_info.source_range_start:
@@ -104,6 +104,10 @@ class Almanac:
         for chunk in file_contents:
             data = chunk.split("\n")
             match = re.search(r"(\w+-to-\w+) map:", data.pop(0))
+            if match is None:
+                raise ValueError(
+                    "Expected a regex hit; expected input of different format."
+                )
             key = match.group(1)
             self._range_maps[key] = RangeMap(data)
 
@@ -114,7 +118,7 @@ class Almanac:
             test_value, _ = self._calculate_location_and_range(seed)
             if test_value < min_location:
                 min_location = test_value
-        return min_location
+        return int(min_location)
 
     def lowest_location_number_in_range(self) -> int:
         """Returns the lowest location number in seed range"""
@@ -122,16 +126,16 @@ class Almanac:
         seed_ranges = list(zip(self.seeds[::2], self.seeds[1::2]))
         seed_ranges.sort(key=lambda value: value[0])
         for seed_start, seed_range in seed_ranges:
-            seed = seed_start
+            seed = float(seed_start)
             while seed < seed_start + seed_range:
                 print(seed)
                 (test_location, test_range) = self._calculate_location_and_range(seed)
                 if test_location < min_location:
                     min_location = test_location
                 seed += test_range
-        return min_location
+        return int(min_location)
 
-    def _calculate_location_and_range(self, seed: int) -> Tuple[int, int]:
+    def _calculate_location_and_range(self, seed: float) -> Tuple[float, float]:
         stages = [
             "seed-to-soil",
             "soil-to-fertilizer",
