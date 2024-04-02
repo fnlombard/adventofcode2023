@@ -42,12 +42,12 @@ class AsciiParser:
         self.ascii_string_ = ascii_string
         self.boxes_: List[Box] = [Box() for _ in range(256)]
 
-    def _get_value(self, ascii: str) -> int:
+    def _get_value(self, tmp_ascii: str) -> int:
         calculate_ascii_value = (
             lambda first_char, second_char: (first_char + second_char) * 17 % 256
         )
 
-        return reduce(calculate_ascii_value, [ord(char) for char in ascii], 0)
+        return reduce(calculate_ascii_value, [ord(char) for char in tmp_ascii], 0)
 
     def get_total_value(self) -> int:
         return sum([self._get_value(ascii) for ascii in self.ascii_string_.split(",")])

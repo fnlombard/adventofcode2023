@@ -96,7 +96,7 @@ def main():
         print("File does not exist")
 
     elf_sum = 0
-    with open(input_file_path) as file:
+    with open(input_file_path, encoding="utf-8") as file:
         for line in file:
             elf_sum += _get_elf_number(line)
 

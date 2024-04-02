@@ -1,6 +1,5 @@
-#!/usr/bin/env python
+"""Run function to check all source code and run requested solution."""
 
-from contextlib import contextmanager
 from dataclasses import dataclass
 import os
 from pathlib import Path
@@ -48,6 +47,7 @@ def setup_venv(config: Config) -> None:
 
 def run_checks(config: Config) -> None:
     def run_check(library: str) -> subprocess.CompletedProcess:
+        print(f"Running: {library}")
         return subprocess.run([config.venv / "Scripts" / library, "."])
 
     _mypy_result = run_check("mypy")

@@ -24,8 +24,8 @@ class Speedboat:
 
     def __init__(self, filename: str) -> None:
         file_contents = Path(filename).read_text("utf-8").strip().split("\n")
-        times = [time_str for time_str in file_contents[0].split()[1:]]
-        distances = [distance_str for distance_str in file_contents[1].split()[1:]]
+        times = list(file_contents[0].split()[1:])
+        distances = list(file_contents[1].split()[1:])
         self.races = [
             Race(time=int(time), distance=int(distance))
             for (time, distance) in zip(times, distances)

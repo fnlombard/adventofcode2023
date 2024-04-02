@@ -31,22 +31,22 @@ class Board:
     def _map_to_element(self, character: str) -> Element:
         if character == ".":
             return Element.SPACE
-        elif character == "O":
+        if character == "O":
             return Element.BOULDER
-        elif character == "#":
+        if character == "#":
             return Element.CUBE
-        else:
-            raise RuntimeError(f"Unkown character: {character}")
+
+        raise RuntimeError(f"Unkown character: {character}")
 
     def _map_from_element(self, element: Element) -> str:
         if element == Element.BOULDER:
             return "O"
-        elif element == Element.CUBE:
+        if element == Element.CUBE:
             return "#"
-        elif element == Element.SPACE:
+        if element == Element.SPACE:
             return "."
-        else:
-            raise RuntimeError(f"Unkown element: {element}")
+
+        raise RuntimeError(f"Unkown element: {element}")
 
     @contextmanager
     def boulder_positions(self) -> Iterator[List[Tuple[int, int]]]:
