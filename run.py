@@ -25,18 +25,19 @@ class Config:
         return self.day / "solution.py"
 
 
-def setup_venv(config: Config) -> None:
+def setup_venv(project_config: Config) -> None:
 
-    if not config.venv.exists():
+    if not project_config.venv.exists():
         print("Creating virtual environment.")
-        subprocess.run(["python", "-m", "venv", config.venv])
+        subprocess.run(["python", "-m", "venv", project_config.venv], check=True)
     else:
         print("Reusing virtual environment.")
 
     print("Installing required packages.")
     install_output = subprocess.run(
-        args=[str(config.pip), "install", "mypy", "pylint", "black", "numpy"],
+        args=[str(project_config.pip), "install", "mypy", "pylint", "black", "numpy"],
         capture_output=True,
+        check=False,
     )
 
     if install_output.stderr:
@@ -45,19 +46,23 @@ def setup_venv(config: Config) -> None:
         print("    Successfully installed packages.\n")
 
 
-def run_checks(config: Config) -> None:
+def run_checks(project_config: Config) -> None:
     def run_check(library: str) -> subprocess.CompletedProcess:
         print(f"Running: {library}")
-        return subprocess.run([config.venv / "Scripts" / library, "."])
+        return subprocess.run(
+            [project_config.venv / "Scripts" / library, "."], check=False
+        )
 
     _mypy_result = run_check("mypy")
     _pylint_result = run_check("pylint")
     _black_result = run_check("black")
 
 
-def run_solution(config: Config) -> None:
+def run_solution(project_config: Config) -> None:
     _solution_result = subprocess.run(
-        [config.python, config.solution], cwd=config.solution.parent
+        [project_config.python, project_config.solution],
+        cwd=project_config.solution.parent,
+        check=False,
     )
 
 
@@ -78,6 +83,6 @@ if __name__ == "__main__":
         print(f"Directory {solution_path} does not exist.")
         sys.exit(1)
 
-    setup_venv(config=config)
+    setup_venv(project_config=config)
     run_checks(config)
     run_solution(config)
