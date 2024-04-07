@@ -17,10 +17,12 @@ class SpringMap:
         self.lines: List[str] = Path(filename).read_text("utf-8").strip().split("\n")
 
     def get_sum_of_broken_spring_variance(self) -> int:
-        for line in self.lines:
-            (record, contiguous_groups) = line.split()
-            groups = [int(group) for group in contiguous_groups]
+        # for line in self.lines:
+        #     (record, contiguous_groups) = line.split()
+        #     groups = [int(group) for group in contiguous_groups]
         return 0
+
+    def todo(self) -> None: ...
 
 
 if __name__ == "__main__":

@@ -43,14 +43,13 @@ class AsciiParser:
         self.boxes_: List[Box] = [Box() for _ in range(256)]
 
     def _get_value(self, tmp_ascii: str) -> int:
-        calculate_ascii_value = (
-            lambda first_char, second_char: (first_char + second_char) * 17 % 256
-        )
+        def calculate_ascii_value(first_char: int, second_char: int) -> int:
+            return (first_char + second_char) * 17 % 256
 
         return reduce(calculate_ascii_value, [ord(char) for char in tmp_ascii], 0)
 
     def get_total_value(self) -> int:
-        return sum([self._get_value(ascii) for ascii in self.ascii_string_.split(",")])
+        return sum(self._get_value(ascii) for ascii in self.ascii_string_.split(","))
 
     def get_focussing_power(self) -> int:
         for ascii_string in self.ascii_string_.split(","):
@@ -61,14 +60,12 @@ class AsciiParser:
                 label, _ = ascii_string.split("-")
                 self.boxes_[self._get_value(label)].remove_lens(label)
             else:
-                raise Exception(f"Unexpected value: {ascii_string}")
+                raise ValueError(f"Unexpected value: {ascii_string}")
 
         return sum(
-            [
-                (box_num + 1) * (lens_num + 1) * lens.focal_length
-                for box_num, box in enumerate(self.boxes_)
-                for lens_num, lens in enumerate(box.lenses)
-            ]
+            (box_num + 1) * (lens_num + 1) * lens.focal_length
+            for box_num, box in enumerate(self.boxes_)
+            for lens_num, lens in enumerate(box.lenses)
         )
 
 

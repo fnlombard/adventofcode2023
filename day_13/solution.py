@@ -4,6 +4,7 @@ Solution to https://adventofcode.com/2023/day/13
 
 Usage: solution.py
 """
+# pylint: disable=too-few-public-methods
 
 from enum import Enum, auto
 from pathlib import Path
