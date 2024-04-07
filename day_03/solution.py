@@ -60,9 +60,7 @@ class Engine:
         assert match
 
         (start, end) = match.span()
-        self.lines[y] = (
-            self.lines[y][:start] + "." * (end - start) + self.lines[y][end:]
-        )
+        self.lines[y] = self.lines[y][:start] + "." * (end - start) + self.lines[y][end:]
         return int(match.group(1))
 
     def _get_surrounding_sum(self, x: int, y: int) -> int:

@@ -64,10 +64,7 @@ class ScratchCard:
     def _get_numbers(self, card_part: CardPart, line: str) -> List[int]:
         ret_val = []
         try:
-            ret_val = [
-                int(num)
-                for num in line.split(":")[1].split("|")[card_part.value].split()
-            ]
+            ret_val = [int(num) for num in line.split(":")[1].split("|")[card_part.value].split()]
         except IndexError:
             print(f"Cannot parse numbers from line: {line}")
         return ret_val

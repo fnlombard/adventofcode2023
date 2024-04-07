@@ -56,9 +56,7 @@ class AsciiParser:
         for ascii_string in self.ascii_string_.split(","):
             if "=" in ascii_string:
                 label, focal_length = ascii_string.split("=")
-                self.boxes_[self._get_value(label)].add_lens(
-                    Lens(label, int(focal_length))
-                )
+                self.boxes_[self._get_value(label)].add_lens(Lens(label, int(focal_length)))
             elif "-" in ascii_string:
                 label, _ = ascii_string.split("-")
                 self.boxes_[self._get_value(label)].remove_lens(label)

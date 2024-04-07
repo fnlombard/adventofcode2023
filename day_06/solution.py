@@ -59,13 +59,9 @@ class Speedboat:
         t = race.time
         d = race.distance
         lower_bound = max((t - (t**2 - 4 * d) ** 0.5) / 2, 0)
-        lower_bound = (
-            lower_bound + 1 if lower_bound.is_integer() else math.ceil(lower_bound)
-        )
+        lower_bound = lower_bound + 1 if lower_bound.is_integer() else math.ceil(lower_bound)
         upper_bound = min((t + (t**2 - 4 * d) ** 0.5) / 2, t)
-        upper_bound = (
-            upper_bound - 1 if upper_bound.is_integer() else math.floor(upper_bound)
-        )
+        upper_bound = upper_bound - 1 if upper_bound.is_integer() else math.floor(upper_bound)
         return upper_bound - lower_bound + 1
 
 
@@ -73,7 +69,5 @@ if __name__ == "__main__":
     assert Speedboat("example.txt").get_winning_product() == 288
 
     puzzle_result = Speedboat("puzzle_input.txt")
-    print(
-        f"The product of the winning sums for puzzle 01: {puzzle_result.get_winning_product()}"
-    )
+    print(f"The product of the winning sums for puzzle 01: {puzzle_result.get_winning_product()}")
     print(f"The winning sums for puzzle 02: {puzzle_result.get_winning_num()}")

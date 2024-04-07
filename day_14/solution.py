@@ -22,10 +22,7 @@ class Element(Enum):
 class Board:
     def __init__(self, board_data: List[str]) -> None:
         self.content = np.array(
-            [
-                [self._map_to_element(character) for character in line]
-                for line in board_data
-            ]
+            [[self._map_to_element(character) for character in line] for line in board_data]
         )
 
     def _map_to_element(self, character: str) -> Element:
@@ -63,8 +60,7 @@ class Board:
 
     def __str__(self) -> str:
         return "\n".join(
-            "".join(self._map_from_element(element) for element in line)
-            for line in self.content
+            "".join(self._map_from_element(element) for element in line) for line in self.content
         )
 
     def get_load(self) -> int:
@@ -91,9 +87,7 @@ class Board:
             load_values = np.append(load_values, self.get_load())
             pattern_length = self._get_pattern_length(load_values)
             oscillation_period = self._oscillation_period(load_values)
-            match_length = (
-                pattern_length if pattern_length is not None else oscillation_period
-            )
+            match_length = pattern_length if pattern_length is not None else oscillation_period
             if match_length is not None:
                 pattern = load_values[-match_length:]
                 pattern_idx = (n_cycles - len(load_values)) % len(pattern)
@@ -111,9 +105,7 @@ class Board:
                 return pattern_length
         return None
 
-    def _oscillation_period(
-        self, data: np.ndarray, threshold: float = 0.01
-    ) -> Optional[int]:
+    def _oscillation_period(self, data: np.ndarray, threshold: float = 0.01) -> Optional[int]:
         if len(data) < 500:
             return None
         data_without_dc = data - np.mean(data)

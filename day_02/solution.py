@@ -17,9 +17,7 @@ class Cubes:
     def __init__(self, filename) -> None:
         self.lines = Path(filename).read_text("utf-8").strip().split("\n")
 
-    def get_possible_games_id_sum(
-        self, red_cubes: int, green_cubes: int, blue_cubes: int
-    ) -> int:
+    def get_possible_games_id_sum(self, red_cubes: int, green_cubes: int, blue_cubes: int) -> int:
         """Returns sum of possible game IDs"""
         id_sum = 0
         for line in self.lines:
@@ -83,7 +81,5 @@ if __name__ == "__main__":
     assert Cubes("example_02.txt").get_power_cubes() == 2286
 
     puzzle_result = Cubes("puzzle_input.txt")
-    print(
-        f"ID sum for puzzle 01: {puzzle_result.get_possible_games_id_sum(12, 13, 14)}"
-    )
+    print(f"ID sum for puzzle 01: {puzzle_result.get_possible_games_id_sum(12, 13, 14)}")
     print(f"Power cubes for puzzle 01: {puzzle_result.get_power_cubes()}")

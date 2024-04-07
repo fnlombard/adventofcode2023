@@ -49,13 +49,11 @@ def setup_venv(project_config: Config) -> None:
 def run_checks(project_config: Config) -> None:
     def run_check(library: str) -> subprocess.CompletedProcess:
         print(f"Running: {library}")
-        return subprocess.run(
-            [project_config.venv / "Scripts" / library, "."], check=False
-        )
+        return subprocess.run([project_config.venv / "Scripts" / library, "."], check=False)
 
+    _black_result = run_check("black")
     _mypy_result = run_check("mypy")
     _pylint_result = run_check("pylint")
-    _black_result = run_check("black")
 
 
 def run_solution(project_config: Config) -> None:

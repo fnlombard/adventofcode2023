@@ -62,22 +62,20 @@ class RangeMap:
             if source_value < map_info.source_range_start:
                 range_to_end = self._maps[index].source_range_start - source_value
                 break
-            elif (
+
+            if (
                 map_info.source_range_start
                 <= source_value
                 < map_info.source_range_start + map_info.range_length
             ):
                 destination_value = (
-                    map_info.desintation_range_start
-                    + source_value
-                    - map_info.source_range_start
+                    map_info.desintation_range_start + source_value - map_info.source_range_start
                 )
-                range_to_end = map_info.range_length - (
-                    map_info.source_range_start - source_value
-                )
+                range_to_end = map_info.range_length - (map_info.source_range_start - source_value)
                 range_to_end /= 2
                 break
-            elif (
+
+            if (
                 index + 1 < len(self._maps)
                 and source_value < self._maps[index + 1].source_range_start
             ):
@@ -89,8 +87,10 @@ class RangeMap:
 
     def __repr__(self) -> str:
         ret_val = ""
-        for map in self._maps:
-            ret_val += f"{map.desintation_range_start} {map.source_range_start} {map.range_length}\n"
+        for range_map in self._maps:
+            ret_val += f"{range_map.desintation_range_start} "
+            ret_val += f"{range_map.source_range_start} "
+            ret_val += f"{range_map.range_length}\n"
         return ret_val
 
 
@@ -105,9 +105,7 @@ class Almanac:
             data = chunk.split("\n")
             match = re.search(r"(\w+-to-\w+) map:", data.pop(0))
             if match is None:
-                raise ValueError(
-                    "Expected a regex hit; expected input of different format."
-                )
+                raise ValueError("Expected a regex hit; expected input of different format.")
             key = match.group(1)
             self._range_maps[key] = RangeMap(data)
 
@@ -116,8 +114,7 @@ class Almanac:
         min_location = float("inf")
         for seed in self.seeds:
             test_value, _ = self._calculate_location_and_range(seed)
-            if test_value < min_location:
-                min_location = test_value
+            min_location = min(min_location, test_value)
         return int(min_location)
 
     def lowest_location_number_in_range(self) -> int:
@@ -130,8 +127,7 @@ class Almanac:
             while seed < seed_start + seed_range:
                 print(seed)
                 (test_location, test_range) = self._calculate_location_and_range(seed)
-                if test_location < min_location:
-                    min_location = test_location
+                min_location = min(min_location, test_location)
                 seed += test_range
         return int(min_location)
 
@@ -147,9 +143,8 @@ class Almanac:
         ]
         min_range = float("inf")
         for stage in stages:
-            (seed, range) = self._range_maps[stage].map_value(seed)
-            if range < min_range:
-                min_range = range
+            (seed, map_range) = self._range_maps[stage].map_value(seed)
+            min_range = min(min_range, map_range)
         return (seed, min_range)
 
 
@@ -158,9 +153,8 @@ if __name__ == "__main__":
     assert Almanac("example.txt").lowest_location_number_in_range() == 46
 
     puzzle_result = Almanac("puzzle_input.txt")
+    print(f"Lowest location value for puzzle 01: {puzzle_result.lowest_location_number()}")
     print(
-        f"Lowest location value for puzzle 01: {puzzle_result.lowest_location_number()}"
-    )
-    print(
-        f"Lowest location value in seed range for puzzle 02: {puzzle_result.lowest_location_number_in_range()}"
+        f"Lowest location value in seed range for puzzle 02: "
+        f"{puzzle_result.lowest_location_number_in_range()}"
     )
