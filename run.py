@@ -82,5 +82,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     setup_venv(project_config=config)
+    print("Running checks...")
     run_checks(config)
     run_solution(config)
